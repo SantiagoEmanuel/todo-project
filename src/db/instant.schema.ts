@@ -25,8 +25,28 @@ const _schema = i.schema({
       to: i.date(),
       createdAt: i.date(),
     }),
+    // Microobjetivos de una tarea. Genérico: sirve como checklist,
+    // lista de supermercado, subtareas, etc.
+    items: i.entity({
+      text: i.string(),
+      done: i.boolean(),
+      createdAt: i.date(),
+    }),
   },
   links: {
+    todosItems: {
+      forward: {
+        on: "todos",
+        has: "many",
+        label: "items",
+      },
+      reverse: {
+        on: "items",
+        has: "one",
+        label: "todo",
+        onDelete: "cascade",
+      },
+    },
     $streams$files: {
       forward: {
         on: "$streams",
