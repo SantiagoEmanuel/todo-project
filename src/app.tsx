@@ -16,7 +16,7 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2 items-center justify-center">
+      <div className="min-h-screen flex flex-col gap-2 items-center justify-center">
         <div className="rounded-full animated-spin border border-b-transparent border-gray-700"></div>
         <p>Cargando</p>
       </div>
