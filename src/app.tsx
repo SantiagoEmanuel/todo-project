@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActionBar } from "./components/actionBar";
 import TodoForm from "./components/todoForm";
 import TodoList from "./components/todoList";
@@ -8,6 +8,12 @@ export default function App() {
   // Read Data
   const { isLoading, error, data } = db.useQuery({ todos: { items: {} } });
   const [password, setPassword] = useState<string>("");
+  const [show, setShow] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (password === import.meta.env.VITE_PASSWORD) setShow(true);
+  }, [password]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 items-center justify-center">
@@ -21,7 +27,7 @@ export default function App() {
   }
   const { todos } = data;
 
-  if (password !== import.meta.env.VITE_PASSWORD) {
+  if (!show) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-lg">Contraseña</h1>
@@ -36,6 +42,7 @@ export default function App() {
       </div>
     );
   }
+
   return (
     <div className="font-mono min-h-screen flex justify-center items-center flex-col space-y-4 p-4">
       <h2 className="tracking-wide text-3xl text-gray-700/60">Tareas</h2>
