@@ -5,7 +5,7 @@ import db from "./lib/db";
 
 export default function App() {
   // Read Data
-  const { isLoading, error, data } = db.useQuery({ todos: {} });
+  const { isLoading, error, data } = db.useQuery({ todos: { items: {} } });
   if (isLoading) {
     return;
   }

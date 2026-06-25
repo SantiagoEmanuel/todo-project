@@ -1,6 +1,6 @@
 import { id } from "@instantdb/react";
 import db from "../lib/db";
-import type { Todo } from "../type/todo.type";
+import type { Item, Todo } from "../type/todo.type";
 
 export function addTodo(text: string) {
   db.transact(
@@ -31,4 +31,27 @@ export function toggleAll(todos: Todo[]) {
   db.transact(
     todos.map((todo) => db.tx.todos[todo.id].update({ done: newVal })),
   );
+}
+
+// --- Microobjetivos (items) ---
+
+export function addItem(todoId: string, text: string) {
+  const itemId = id();
+  db.transact(
+    db.tx.items[itemId]
+      .update({
+        text,
+        done: false,
+        createdAt: Date.now(),
+      })
+      .link({ todo: todoId }),
+  );
+}
+
+export function deleteItem(item: Item) {
+  db.transact(db.tx.items[item.id].delete());
+}
+
+export function toggleItem(item: Item) {
+  db.transact(db.tx.items[item.id].update({ done: !item.done }));
 }
