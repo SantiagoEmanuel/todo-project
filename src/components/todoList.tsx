@@ -37,7 +37,7 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
                   />
                 </div>
               </div>
-              <div className="flex-1 px-2 overflow-hidden flex items-center">
+              <div className="flex-1 px-2 overflow-hidden flex items-center capitalize">
                 {todo.done ? (
                   <span className="line-through">{todo.text}</span>
                 ) : (

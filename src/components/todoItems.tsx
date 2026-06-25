@@ -21,11 +21,11 @@ export default function TodoItems({ todo }: { todo: Todo }) {
             </div>
             <div className="flex-1 px-2 overflow-hidden flex items-center">
               {item.done ? (
-                <span className="line-through text-xs text-gray-400">
+                <span className="line-through text-xs text-gray-400 capitalize">
                   {item.text}
                 </span>
               ) : (
-                <span className="text-xs">{item.text}</span>
+                <span className="text-xs capitalize">{item.text}</span>
               )}
             </div>
             <button
@@ -50,8 +50,8 @@ export default function TodoItems({ todo }: { todo: Todo }) {
         }}
       >
         <input
-          className="h-full flex-1 outline-hidden px-2 bg-transparent text-xs"
-          placeholder="+ Agregar microobjetivo"
+          className="h-full flex-1 outline-hidden px-2 bg-transparent text-xs capitalize"
+          placeholder="+ Agregar sub-tarea"
           type="text"
           name="item"
         />
