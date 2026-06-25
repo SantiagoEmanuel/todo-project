@@ -3,6 +3,7 @@ import { ActionBar } from "./components/actionBar";
 import TodoForm from "./components/todoForm";
 import TodoList from "./components/todoList";
 import db from "./lib/db";
+import { VITE_PASSWORD } from "./credentials/credentials";
 
 export default function App() {
   // Read Data
@@ -11,7 +12,7 @@ export default function App() {
   const [show, setShow] = useState<boolean>(false);
 
   useEffect(() => {
-    if (password === import.meta.env.VITE_PASSWORD) setShow(true);
+    if (password === VITE_PASSWORD) setShow(true);
   }, [password]);
 
   if (isLoading) {
