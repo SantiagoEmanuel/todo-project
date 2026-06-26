@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import type { Todo } from "../type/todo.type";
 import { deleteTodo, toggleDone } from "../utils/db.functions";
+import CompleteTodoModal from "./completeTodoModal";
 import TodoItems from "./todoItems";
 import ChevronDownIcon from "./ui/chevronDownIcon";
-import Modal from "./ui/modal";
-import CompleteTodoModal from "./completeTodoModal";
 
 export default function TodoList({ todos }: { todos: Todo[] }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -91,7 +90,10 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
         );
       })}
       {showCompletedModal && (
-        <CompleteTodoModal todoId={todoCompleted} onClose={() => setShowCompletedModal(false)} />
+        <CompleteTodoModal
+          todoId={todoCompleted}
+          onClose={() => setShowCompletedModal(false)}
+        />
       )}
     </div>
   );
