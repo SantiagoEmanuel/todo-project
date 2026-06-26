@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Todo } from "../type/todo.type";
 import { deleteTodo, toggleDone } from "../utils/db.functions";
-import ChevronDownIcon from "./ui/chevronDownIcon";
 import TodoItems from "./todoItems";
+import ChevronDownIcon from "./ui/chevronDownIcon";
+import Modal from "./ui/modal";
+import CompleteTodoModal from "./completeTodoModal";
 
 export default function TodoList({ todos }: { todos: Todo[] }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [todoCompleted, setTodoCompleted] = useState<string>("");
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
 
   const toggleExpanded = (id: string) =>
     setExpanded((prev) => {
@@ -18,17 +22,26 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
       return next;
     });
 
+  useEffect(() => {
+    if (todoCompleted !== "") {
+      setShowCompletedModal(true);
+    }
+  }, [todoCompleted]);
+
   return (
     <div className="divide-y divide-gray-300">
       {todos.map((todo) => {
         const isOpen = expanded.has(todo.id);
         const total = todo.items.length;
         const completed = todo.items.filter((item) => item.done).length;
+        if (completed === total && total > 0) {
+          setTodoCompleted(todo.id);
+        }
         return (
           <div key={todo.id}>
-            <div className="flex items-center h-10">
-              <div className="h-full px-2 flex items-center justify-center border-r border-gray-300">
-                <div className="w-5 h-5 flex items-center justify-center">
+            <div className="flex h-10 items-center">
+              <div className="flex h-full items-center justify-center border-r border-gray-300 px-2">
+                <div className="flex h-5 w-5 items-center justify-center">
                   <input
                     type="checkbox"
                     className="cursor-pointer"
@@ -37,15 +50,19 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
                   />
                 </div>
               </div>
-              <div className="flex-1 px-2 overflow-hidden flex items-center capitalize">
+              <div className="flex flex-1 items-center overflow-hidden px-2 capitalize">
                 {todo.done ? (
-                  <span className="line-through">{todo.text}</span>
+                  <span className="text-xs text-gray-400 capitalize line-through">
+                    {todo.text}
+                  </span>
                 ) : (
-                  <span className="text-xs">{todo.text}</span>
+                  <span className="text-xs text-gray-600 capitalize">
+                    {todo.text}
+                  </span>
                 )}
               </div>
               <button
-                className="h-full px-2 flex items-center justify-center gap-1 text-gray-400 hover:text-gray-600 border-l border-l-gray-300"
+                className="flex h-full items-center justify-center gap-1 border-l border-l-gray-300 px-2 text-gray-400 hover:text-gray-600"
                 onClick={() => toggleExpanded(todo.id)}
                 aria-label="Mostrar microobjetivos"
                 aria-expanded={isOpen}
@@ -57,13 +74,13 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
                   </span>
                 )}
                 <span
-                  className={`w-4 h-4 transition-transform ${isOpen ? "" : "-rotate-90"}`}
+                  className={`h-4 w-4 transition-transform ${isOpen ? "" : "-rotate-90"}`}
                 >
                   <ChevronDownIcon />
                 </span>
               </button>
               <button
-                className="h-full px-2 flex items-center justify-center text-gray-300 hover:text-gray-500 border-l border-l-gray-300"
+                className="flex h-full items-center justify-center border-l border-l-gray-300 px-2 text-gray-300 hover:text-gray-500"
                 onClick={() => deleteTodo(todo)}
               >
                 X
@@ -73,6 +90,9 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
           </div>
         );
       })}
+      {showCompletedModal && (
+        <CompleteTodoModal todoId={todoCompleted} onClose={() => setShowCompletedModal(false)} />
+      )}
     </div>
   );
 }

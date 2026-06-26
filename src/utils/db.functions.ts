@@ -16,8 +16,8 @@ export function deleteTodo(todo: Todo) {
   db.transact(db.tx.todos[todo.id].delete());
 }
 
-export function toggleDone(todo: Todo) {
-  db.transact(db.tx.todos[todo.id].update({ done: !todo.done }));
+export function toggleDone(todo: Partial<Todo>) {
+  db.transact(db.tx.todos[todo.id!].update({ done: !todo.done }));
 }
 
 export function deleteCompleted(todos: Todo[]) {

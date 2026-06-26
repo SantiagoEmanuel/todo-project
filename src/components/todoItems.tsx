@@ -25,7 +25,9 @@ export default function TodoItems({ todo }: { todo: Todo }) {
                   {item.text}
                 </span>
               ) : (
-                <span className="text-xs capitalize">{item.text}</span>
+                <span className="text-xs text-gray-600 capitalize">
+                  {item.text}
+                </span>
               )}
             </div>
             <button
