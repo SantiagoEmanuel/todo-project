@@ -1,22 +1,22 @@
-import type { Todo } from "../type/todo.type";
+import type { Todo } from "../types/todo.type";
 import { addTodo, toggleAll } from "../utils/db.functions";
 import ChevronDownIcon from "./ui/chevronDownIcon";
 
 export default function TodoForm({ todos }: { todos: Todo[] }) {
   return (
-    <div className="flex items-center h-10 border-b border-gray-300">
+    <div className="flex h-10 items-center border-b border-gray-300">
       <button
-        className="h-full px-2 border-r border-gray-300 flex items-center justify-center"
+        className="flex h-full items-center justify-center border-r border-gray-300 px-2"
         onClick={() => toggleAll(todos)}
         aria-label="Completar todas las tareas"
         title="Completar todas las tareas pendientes"
       >
-        <div className="w-5 h-5">
+        <div className="h-5 w-5">
           <ChevronDownIcon />
         </div>
       </button>
       <form
-        className="flex-1 h-full flex gap-4 items-center justify-between"
+        className="flex h-full flex-1 items-center justify-between gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           addTodo(e.target.input.value);
@@ -24,7 +24,7 @@ export default function TodoForm({ todos }: { todos: Todo[] }) {
         }}
       >
         <input
-          className="h-full outline-hidden px-2 bg-transparent text-sm capitalize"
+          className="h-full bg-transparent px-2 text-sm capitalize outline-hidden"
           autoFocus
           placeholder="¿Qué tareas tienes?"
           type="text"

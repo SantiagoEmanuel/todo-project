@@ -1,6 +1,6 @@
 import { init } from "@instantdb/react";
+import { VITE_PUBLIC_APP_ID } from "../constants/credentials";
 import schema from "../db/instant.schema";
-import { VITE_PUBLIC_APP_ID } from "../credentials/credentials";
 
 const db = init({
   appId: VITE_PUBLIC_APP_ID,

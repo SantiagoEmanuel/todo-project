@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Impeding auto zoom in iOS when focusing on input fields */
 input,
 textarea,
 select {

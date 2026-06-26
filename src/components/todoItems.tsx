@@ -1,4 +1,4 @@
-import type { Todo } from "../type/todo.type";
+import type { Todo } from "../types/todo.type";
 import { addItem, deleteItem, toggleItem } from "../utils/db.functions";
 
 export default function TodoItems({ todo }: { todo: Todo }) {
@@ -7,11 +7,11 @@ export default function TodoItems({ todo }: { todo: Todo }) {
   );
 
   return (
-    <div className="bg-gray-50 border-t border-gray-200 pl-9">
+    <div className="border-t border-gray-200 bg-gray-50 pl-9">
       <div className="divide-y divide-gray-200">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center h-8">
-            <div className="h-full px-2 flex items-center justify-center">
+          <div key={item.id} className="flex h-8 items-center">
+            <div className="flex h-full items-center justify-center px-2">
               <input
                 type="checkbox"
                 className="cursor-pointer"
@@ -19,9 +19,12 @@ export default function TodoItems({ todo }: { todo: Todo }) {
                 onChange={() => toggleItem(item)}
               />
             </div>
-            <div className="flex-1 px-2 overflow-hidden flex items-center">
+            <div
+              className="flex flex-1 items-center overflow-hidden px-2"
+              onClick={() => toggleItem(todo)}
+            >
               {item.done ? (
-                <span className="line-through text-xs text-gray-400 capitalize">
+                <span className="text-xs text-gray-400 capitalize line-through">
                   {item.text}
                 </span>
               ) : (
@@ -31,7 +34,7 @@ export default function TodoItems({ todo }: { todo: Todo }) {
               )}
             </div>
             <button
-              className="h-full px-2 flex items-center justify-center text-gray-300 hover:text-gray-500"
+              className="flex h-full items-center justify-center px-2 text-gray-300 hover:text-gray-500"
               onClick={() => deleteItem(item)}
               aria-label="Eliminar microobjetivo"
             >
@@ -41,7 +44,7 @@ export default function TodoItems({ todo }: { todo: Todo }) {
         ))}
       </div>
       <form
-        className="flex items-center h-8 border-t border-gray-200"
+        className="flex h-8 items-center border-t border-gray-200"
         onSubmit={(e) => {
           e.preventDefault();
           const input = e.currentTarget.item as HTMLInputElement;
@@ -52,7 +55,7 @@ export default function TodoItems({ todo }: { todo: Todo }) {
         }}
       >
         <input
-          className="h-full flex-1 outline-hidden px-2 bg-transparent text-xs capitalize"
+          className="h-full flex-1 bg-transparent px-2 text-xs capitalize outline-hidden"
           placeholder="+ Agregar sub-tarea"
           type="text"
           name="item"

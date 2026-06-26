@@ -1,6 +1,6 @@
 import { id } from "@instantdb/react";
 import db from "../lib/db";
-import type { Item, Todo } from "../type/todo.type";
+import type { Item, Todo } from "../types/todo.type";
 
 export function addTodo(text: string) {
   db.transact(

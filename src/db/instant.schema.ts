@@ -22,11 +22,8 @@ const _schema = i.schema({
     todos: i.entity({
       text: i.string(),
       done: i.boolean(),
-      to: i.date(),
       createdAt: i.date(),
     }),
-    // Microobjetivos de una tarea. Genérico: sirve como checklist,
-    // lista de supermercado, subtareas, etc.
     items: i.entity({
       text: i.string(),
       done: i.boolean(),

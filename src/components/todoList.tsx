@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Todo } from "../type/todo.type";
+import type { Todo } from "../types/todo.type";
 import { deleteTodo, toggleDone } from "../utils/db.functions";
 import CompleteTodoModal from "./completeTodoModal";
 import TodoItems from "./todoItems";
