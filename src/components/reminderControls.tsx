@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import {
   notificationsSupported,
@@ -22,6 +23,9 @@ const TEST_FEEDBACK: Record<TestResult, string> = {
   "no-sw": "El service worker no está disponible.",
 };
 
+const pillButton =
+  "cursor-pointer rounded-full border border-gray-200 px-2.5 py-1 transition-colors hover:bg-gray-100";
+
 export default function ReminderControls({
   intervalMin,
   onIntervalChange,
@@ -43,7 +47,7 @@ export default function ReminderControls({
 
   if (!supported) {
     return (
-      <div className="border-t border-gray-300 px-2 py-2 text-[11px] text-gray-400">
+      <div className="border-t border-gray-200 px-3 py-2.5 text-[11px] text-gray-400">
         Tu navegador no soporta recordatorios.
       </div>
     );
@@ -106,22 +110,23 @@ export default function ReminderControls({
     permission === "granted" && pushConfigured() && pushSupported();
 
   return (
-    <div className="flex flex-col gap-1 border-t border-gray-300 px-2 py-2 text-[11px] text-gray-500">
+    <div className="flex flex-col gap-1.5 border-t border-gray-200 px-3 py-2.5 text-[11px] text-gray-500">
       <div className="flex items-center justify-between gap-2">
         {permission === "granted" ? (
           <>
             <span>🔔 Recordatorios activos</span>
             <div className="flex items-center gap-2">
-              <button
-                className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+              <motion.button
+                className={pillButton}
                 onClick={test}
+                whileTap={{ scale: 0.94 }}
               >
                 Probar
-              </button>
+              </motion.button>
               <label className="flex items-center gap-1">
                 cada
                 <select
-                  className="cursor-pointer rounded border border-gray-300 bg-transparent px-1 py-0.5"
+                  className="cursor-pointer rounded-full border border-gray-200 bg-transparent px-2 py-1 transition-colors hover:bg-gray-100"
                   value={intervalMin}
                   onChange={(e) => onIntervalChange(Number(e.target.value))}
                 >
@@ -140,12 +145,13 @@ export default function ReminderControls({
             navegador.
           </span>
         ) : (
-          <button
+          <motion.button
             className="flex cursor-pointer items-center gap-1 text-[#863bff] hover:underline"
             onClick={enable}
+            whileTap={{ scale: 0.97 }}
           >
             🔔 Activar recordatorios de tareas pendientes
-          </button>
+          </motion.button>
         )}
       </div>
       {showPushRow && (
@@ -157,23 +163,37 @@ export default function ReminderControls({
           </span>
           <div className="flex items-center gap-2">
             {pushOn && (
-              <button
-                className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+              <motion.button
+                className={pillButton}
                 onClick={testPush}
+                whileTap={{ scale: 0.94 }}
               >
                 Probar push
-              </button>
+              </motion.button>
             )}
-            <button
-              className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+            <motion.button
+              className={pillButton}
               onClick={togglePush}
+              whileTap={{ scale: 0.94 }}
             >
               {pushOn ? "Desactivar" : "Activar"}
-            </button>
+            </motion.button>
           </div>
         </div>
       )}
-      {feedback && <span className="text-gray-400">{feedback}</span>}
+      <AnimatePresence>
+        {feedback && (
+          <motion.span
+            className="text-gray-400"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {feedback}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
