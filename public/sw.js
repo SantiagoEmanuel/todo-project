@@ -101,6 +101,28 @@ self.addEventListener("periodicsync", (event) => {
   if (event.tag === "todo-reminders") event.waitUntil(showReminder());
 });
 
+// Web Push: notificaciones enviadas desde un backend (ver
+// docs/PUSH_NOTIFICATIONS_PLAN.md). El payload llega cifrado y aquí solo se
+// muestra. Funciona aunque la app esté completamente cerrada.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Tareas pendientes ⏰", {
+      body: data.body || "Tienes tareas pendientes.",
+      tag: data.tag || "todo-reminders",
+      renotify: true,
+      icon: "./pwa-192.png",
+      badge: "./pwa-192.png",
+      data: { url: data.url || "./" },
+    }),
+  );
+});
+
 // Permite que la app dispare un recordatorio inmediato desde primer plano.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "REMIND")

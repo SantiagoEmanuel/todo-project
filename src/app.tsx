@@ -4,8 +4,10 @@ import ReminderControls from "./components/reminderControls";
 import TodoForm from "./components/todoForm";
 import TodoList from "./components/todoList";
 import db from "./lib/db";
+import { updatePushInterval } from "./lib/push";
 import { getIntervalMin, setStoredIntervalMin } from "./lib/reminders";
 import { useReminders } from "./lib/useReminders";
+import { useTaskReminders } from "./lib/useTaskReminders";
 
 export default function App() {
   // Read Data
@@ -13,10 +15,12 @@ export default function App() {
   const [intervalMin, setIntervalMin] = useState(getIntervalMin());
 
   useReminders(data?.todos, intervalMin);
+  useTaskReminders(data?.todos);
 
   const handleIntervalChange = (min: number) => {
     setIntervalMin(min);
     setStoredIntervalMin(min);
+    void updatePushInterval(min);
   };
 
   if (isLoading) {
