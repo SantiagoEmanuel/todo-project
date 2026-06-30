@@ -173,8 +173,12 @@ Ya está en el código (el cliente se suscribe directamente a InstantDB con
   recordatorio por tarea en `TaskReminder` (presets + `datetime-local`).
 - **Service worker:** handler `push` que muestra la notificación.
 - **Backend:** `server/reminders.ts` (admin SDK + `web-push`),
-  `api/send-reminders.ts` (cron) y `api/test-push.ts` (prueba e2e).
-- **Cron:** `vercel.json` cada 15 min.
+  `api/send-reminders.ts` (a disparar por un cron) y `api/test-push.ts`
+  (prueba e2e).
+- **Disparo periódico:** se hace con un cron externo o con Vercel Cron en el
+  plan Pro (ver más abajo). No se incluye `vercel.json` con cron en el repo
+  porque el plan Hobby rechaza el deploy si el cron corre más de una vez al
+  día.
 
 ### Puesta en marcha
 
@@ -187,15 +191,22 @@ Ya está en el código (el cliente se suscribe directamente a InstantDB con
      `CRON_SECRET`.
    - `VITE_VAPID_PUBLIC_KEY` y `VAPID_PUBLIC_KEY` deben ser **la misma** clave.
 3. **Aplicar el schema:** `INSTANT_APP_ID=... npx instant-cli push`.
-4. **Desplegar** en Vercel. El cron queda activo automáticamente por
-   `vercel.json`.
-5. **Probar:** instalar la PWA → "Activar" recordatorios → "Activar" push →
+4. **Desplegar** en Vercel (las funciones de `api/` se detectan solas).
+5. **Programar el disparo periódico** (elegí una opción):
+   - **Cron externo (recomendado en Hobby):** en cron-job.org (u otro)
+     programá una llamada cada 15 min a
+     `POST https://<tu-dominio>/api/send-reminders` con el header
+     `Authorization: Bearer <CRON_SECRET>`.
+   - **Vercel Pro:** crear `vercel.json` con
+     `{ "crons": [{ "path": "/api/send-reminders", "schedule": "*/15 * * * *" }] }`.
+6. **Probar:** instalar la PWA → "Activar" recordatorios → "Activar" push →
    "Probar push" (debería llegar la notificación aunque cierres la app).
 
 ### Nota sobre la frecuencia del cron
 
 En el plan **Hobby** de Vercel los cron jobs se ejecutan, como máximo, **una vez
-al día**. Para recordatorios cada 15–60 min hace falta el plan **Pro**, o bien
-disparar `GET/POST https://<tu-dominio>/api/send-reminders` desde un cron
-externo (p. ej. cron-job.org) enviando el header
-`Authorization: Bearer <CRON_SECRET>`.
+al día** (de hecho, el deploy falla si el `schedule` corre más seguido). Por eso
+el repo **no** incluye `vercel.json` con cron: para recordatorios cada 15–60 min
+usá un **cron externo** que pegue al endpoint (opción 5a) o el plan **Pro**
+(opción 5b). El endpoint `/api/send-reminders` funciona igual sin importar quién
+lo dispare.
