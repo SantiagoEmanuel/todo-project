@@ -12,6 +12,7 @@ import {
   pushSupported,
   subscribeToPush,
   unsubscribeFromPush,
+  type PushSubscribeResult,
 } from "../lib/push";
 import { INTERVAL_OPTIONS, registerPeriodicSync } from "../lib/reminders";
 
@@ -21,6 +22,14 @@ const TEST_FEEDBACK: Record<TestResult, string> = {
   denied: "Notificaciones bloqueadas en los ajustes del navegador.",
   default: "Primero activa los recordatorios.",
   "no-sw": "El service worker no está disponible.",
+};
+
+const PUSH_SUBSCRIBE_FEEDBACK: Record<PushSubscribeResult, string> = {
+  ok: "Push activado ✅",
+  unsupported: "Tu navegador no soporta push.",
+  "not-configured": "Push no configurado en el servidor.",
+  "permission-denied": "Notificaciones bloqueadas en los ajustes del navegador.",
+  error: "No se pudo activar el push. Probá de nuevo.",
 };
 
 const pillButton =
@@ -77,13 +86,17 @@ export default function ReminderControls({
 
   const togglePush = async () => {
     if (pushOn) {
-      await unsubscribeFromPush();
-      setPushOn(false);
-      flash("Recordatorios con la app cerrada desactivados.");
+      const ok = await unsubscribeFromPush();
+      if (ok) setPushOn(false);
+      flash(
+        ok
+          ? "Recordatorios con la app cerrada desactivados."
+          : "No se pudo desactivar el push. Probá de nuevo.",
+      );
     } else {
-      const ok = await subscribeToPush(intervalMin);
-      setPushOn(ok);
-      flash(ok ? "Push activado ✅" : "No se pudo activar el push.");
+      const result = await subscribeToPush(intervalMin);
+      setPushOn(result === "ok");
+      flash(PUSH_SUBSCRIBE_FEEDBACK[result]);
     }
   };
 
