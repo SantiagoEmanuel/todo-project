@@ -33,34 +33,51 @@ export async function getPushSubscription(): Promise<PushSubscription | null> {
   return reg.pushManager.getSubscription();
 }
 
-export async function subscribeToPush(intervalMin: number): Promise<boolean> {
-  if (!pushSupported() || !pushConfigured()) return false;
+export type PushSubscribeResult =
+  | "ok"
+  | "unsupported"
+  | "not-configured"
+  | "permission-denied"
+  | "error";
+
+export async function subscribeToPush(
+  intervalMin: number,
+): Promise<PushSubscribeResult> {
+  if (!pushSupported()) return "unsupported";
+  if (!pushConfigured()) return "not-configured";
   if (Notification.permission !== "granted") {
     const perm = await Notification.requestPermission();
-    if (perm !== "granted") return false;
+    if (perm !== "granted") return "permission-denied";
   }
-  const reg = await navigator.serviceWorker.ready;
-  const sub =
-    (await reg.pushManager.getSubscription()) ??
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VITE_VAPID_PUBLIC_KEY),
-    }));
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub =
+      (await reg.pushManager.getSubscription()) ??
+      (await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VITE_VAPID_PUBLIC_KEY),
+      }));
 
-  const json = sub.toJSON();
-  const keys = json.keys ?? {};
-  if (!json.endpoint || !keys.p256dh || !keys.auth) return false;
+    const json = sub.toJSON();
+    const keys = json.keys ?? {};
+    if (!json.endpoint || !keys.p256dh || !keys.auth) return "error";
 
-  await db.transact(
-    db.tx.pushSubscriptions[lookup("endpoint", json.endpoint)].update({
-      endpoint: json.endpoint,
-      p256dh: keys.p256dh,
-      auth: keys.auth,
-      intervalMin,
-      createdAt: Date.now(),
-    }),
-  );
-  return true;
+    await db.transact(
+      db.tx.pushSubscriptions[lookup("endpoint", json.endpoint)].update({
+        endpoint: json.endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+        intervalMin,
+        createdAt: Date.now(),
+      }),
+    );
+    return "ok";
+  } catch (err) {
+    // Falla típica: VAPID_PUBLIC_KEY inválida/vacía o el push service la
+    // rechaza. Sin este catch, el toggle quedaba inerte y sin feedback.
+    console.error("subscribeToPush failed:", err);
+    return "error";
+  }
 }
 
 export async function updatePushInterval(intervalMin: number): Promise<void> {
@@ -73,12 +90,18 @@ export async function updatePushInterval(intervalMin: number): Promise<void> {
   );
 }
 
-export async function unsubscribeFromPush(): Promise<void> {
-  const sub = await getPushSubscription();
-  if (!sub) return;
-  const { endpoint } = sub;
-  await sub.unsubscribe();
-  await db.transact(
-    db.tx.pushSubscriptions[lookup("endpoint", endpoint)].delete(),
-  );
+export async function unsubscribeFromPush(): Promise<boolean> {
+  try {
+    const sub = await getPushSubscription();
+    if (!sub) return true;
+    const { endpoint } = sub;
+    await sub.unsubscribe();
+    await db.transact(
+      db.tx.pushSubscriptions[lookup("endpoint", endpoint)].delete(),
+    );
+    return true;
+  } catch (err) {
+    console.error("unsubscribeFromPush failed:", err);
+    return false;
+  }
 }
