@@ -36,6 +36,27 @@ export async function showPendingReminder(texts: string[]): Promise<void> {
   await reg.showNotification("Tareas pendientes ⏰", options);
 }
 
+// Notificación de un recordatorio por tarea (temporizador de la tarea).
+export async function showTaskReminder(
+  text: string,
+  tagId: string,
+): Promise<void> {
+  if (!("Notification" in window) || Notification.permission !== "granted")
+    return;
+  if (!("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.ready;
+  const icon = `${import.meta.env.BASE_URL}pwa-192.png`;
+  const options: NotificationOptions = {
+    body: text,
+    tag: `todo-task-${tagId}`,
+    icon,
+    badge: icon,
+    data: { url: import.meta.env.BASE_URL },
+  };
+  (options as NotificationOptions & { renotify?: boolean }).renotify = true;
+  await reg.showNotification("⏰ Recordatorio de tarea", options);
+}
+
 export type TestResult = "ok" | "unsupported" | "denied" | "default" | "no-sw";
 
 // Envía una notificación de prueba inmediata para verificar que el permiso,

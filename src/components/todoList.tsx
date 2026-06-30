@@ -67,6 +67,9 @@ export default function TodoList({ todos }: { todos: Todo[] }) {
                 aria-expanded={isOpen}
                 title="Microobjetivos"
               >
+                {todo.remindAt && !todo.done && (
+                  <span title="Tiene recordatorio">⏰</span>
+                )}
                 {total > 0 && (
                   <span className="text-[10px] tabular-nums">
                     {completed}/{total}

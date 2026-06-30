@@ -55,3 +55,22 @@ export function deleteItem(item: Item) {
 export function toggleItem(item: Item) {
   db.transact(db.tx.items[item.id].update({ done: !item.done }));
 }
+
+// --- Temporizador / recordatorio por tarea ---
+
+export function setTaskReminder(todoId: string, when: Date) {
+  db.transact(
+    db.tx.todos[todoId].update({
+      remindAt: when.getTime(),
+      remindedAt: null,
+    }),
+  );
+}
+
+export function clearTaskReminder(todoId: string) {
+  db.transact(db.tx.todos[todoId].update({ remindAt: null, remindedAt: null }));
+}
+
+export function markTaskReminded(todoId: string) {
+  db.transact(db.tx.todos[todoId].update({ remindedAt: Date.now() }));
+}

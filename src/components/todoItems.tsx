@@ -1,5 +1,6 @@
 import type { Todo } from "../types/todo.type";
 import { addItem, deleteItem, toggleItem } from "../utils/db.functions";
+import TaskReminder from "./taskReminder";
 
 export default function TodoItems({ todo }: { todo: Todo }) {
   const items = [...todo.items].sort(
@@ -8,6 +9,7 @@ export default function TodoItems({ todo }: { todo: Todo }) {
 
   return (
     <div className="border-t border-gray-200 bg-gray-50 pl-9">
+      <TaskReminder todo={todo} />
       <div className="divide-y divide-gray-200">
         {items.map((item) => (
           <div key={item.id} className="flex h-8 items-center">

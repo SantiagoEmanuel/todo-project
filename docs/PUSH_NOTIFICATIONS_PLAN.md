@@ -159,4 +159,43 @@ Dos niveles, de menor a mayor cobertura:
 6. `vercel.json` con el cron.
 7. `api/test-push.ts` + botón "Probar push real".
 
-Estimado: ~½–1 día de trabajo. Si querés, lo implemento en un PR aparte.
+---
+
+## 6. Estado: implementado ✅
+
+Ya está en el código (el cliente se suscribe directamente a InstantDB con
+`lookup`, sin necesidad de `/api/subscribe`):
+
+- **Schema:** entidad `pushSubscriptions` + campos `remindAt`/`remindedAt` en
+  `todos` (temporizador por tarea). Permisos abiertos en `instant.perms.ts`.
+- **Cliente:** `src/lib/push.ts` (suscribir/desuscribir, guardar en InstantDB),
+  controles en `ReminderControls` ("Activar" / "Desactivar" / "Probar push") y
+  recordatorio por tarea en `TaskReminder` (presets + `datetime-local`).
+- **Service worker:** handler `push` que muestra la notificación.
+- **Backend:** `server/reminders.ts` (admin SDK + `web-push`),
+  `api/send-reminders.ts` (cron) y `api/test-push.ts` (prueba e2e).
+- **Cron:** `vercel.json` cada 15 min.
+
+### Puesta en marcha
+
+1. **Generar claves VAPID:** `npx web-push generate-vapid-keys`.
+2. **Variables de entorno** (ver `.env.example`). En local en `.env`; en Vercel
+   en _Project Settings → Environment Variables_:
+   - Cliente: `VITE_PUBLIC_APP_ID`, `VITE_VAPID_PUBLIC_KEY`.
+   - Servidor: `INSTANT_APP_ID`, `INSTANT_ADMIN_TOKEN` (del dashboard de
+     InstantDB), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`,
+     `CRON_SECRET`.
+   - `VITE_VAPID_PUBLIC_KEY` y `VAPID_PUBLIC_KEY` deben ser **la misma** clave.
+3. **Aplicar el schema:** `INSTANT_APP_ID=... npx instant-cli push`.
+4. **Desplegar** en Vercel. El cron queda activo automáticamente por
+   `vercel.json`.
+5. **Probar:** instalar la PWA → "Activar" recordatorios → "Activar" push →
+   "Probar push" (debería llegar la notificación aunque cierres la app).
+
+### Nota sobre la frecuencia del cron
+
+En el plan **Hobby** de Vercel los cron jobs se ejecutan, como máximo, **una vez
+al día**. Para recordatorios cada 15–60 min hace falta el plan **Pro**, o bien
+disparar `GET/POST https://<tu-dominio>/api/send-reminders` desde un cron
+externo (p. ej. cron-job.org) enviando el header
+`Authorization: Bearer <CRON_SECRET>`.

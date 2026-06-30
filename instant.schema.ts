@@ -23,10 +23,24 @@ const _schema = i.schema({
       text: i.string(),
       done: i.boolean(),
       createdAt: i.date(),
+      // Temporizador por tarea: cuándo recordarla con una notificación, y
+      // cuándo se envió ese recordatorio (para no repetirlo).
+      remindAt: i.date().indexed().optional(),
+      remindedAt: i.date().optional(),
     }),
     items: i.entity({
       text: i.string(),
       done: i.boolean(),
+      createdAt: i.date(),
+    }),
+    // Suscripciones Web Push (una por dispositivo/navegador). Las usa el
+    // backend para enviar recordatorios con la app cerrada.
+    pushSubscriptions: i.entity({
+      endpoint: i.string().unique().indexed(),
+      p256dh: i.string(),
+      auth: i.string(),
+      intervalMin: i.number(),
+      lastNotifiedAt: i.number().optional(),
       createdAt: i.date(),
     }),
   },

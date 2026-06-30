@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   notificationsSupported,
   requestPermission,
   showTestNotification,
   type TestResult,
 } from "../lib/notifications";
+import {
+  getPushSubscription,
+  pushConfigured,
+  pushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "../lib/push";
 import { INTERVAL_OPTIONS, registerPeriodicSync } from "../lib/reminders";
 
 const TEST_FEEDBACK: Record<TestResult, string> = {
@@ -27,6 +34,12 @@ export default function ReminderControls({
     supported ? Notification.permission : "denied",
   );
   const [feedback, setFeedback] = useState<string>("");
+  const [pushOn, setPushOn] = useState(false);
+
+  useEffect(() => {
+    if (!pushConfigured() || !pushSupported()) return;
+    void getPushSubscription().then((sub) => setPushOn(Boolean(sub)));
+  }, []);
 
   if (!supported) {
     return (
@@ -57,6 +70,40 @@ export default function ReminderControls({
     const result = await showTestNotification();
     flash(TEST_FEEDBACK[result]);
   };
+
+  const togglePush = async () => {
+    if (pushOn) {
+      await unsubscribeFromPush();
+      setPushOn(false);
+      flash("Recordatorios con la app cerrada desactivados.");
+    } else {
+      const ok = await subscribeToPush(intervalMin);
+      setPushOn(ok);
+      flash(ok ? "Push activado ✅" : "No se pudo activar el push.");
+    }
+  };
+
+  const testPush = async () => {
+    try {
+      const r = await fetch(`${import.meta.env.BASE_URL}api/test-push`, {
+        method: "POST",
+      });
+      const j = (await r.json().catch(() => ({}))) as {
+        sent?: number;
+        error?: string;
+      };
+      flash(
+        r.ok
+          ? `Push enviado a ${j.sent ?? 0} dispositivo(s) ✅`
+          : `Error: ${j.error ?? r.status}`,
+      );
+    } catch {
+      flash("No se pudo contactar al servidor.");
+    }
+  };
+
+  const showPushRow =
+    permission === "granted" && pushConfigured() && pushSupported();
 
   return (
     <div className="flex flex-col gap-1 border-t border-gray-300 px-2 py-2 text-[11px] text-gray-500">
@@ -101,6 +148,31 @@ export default function ReminderControls({
           </button>
         )}
       </div>
+      {showPushRow && (
+        <div className="flex items-center justify-between gap-2">
+          <span>
+            {pushOn
+              ? "📲 Recordatorios con la app cerrada activos"
+              : "📲 Recibir recordatorios con la app cerrada"}
+          </span>
+          <div className="flex items-center gap-2">
+            {pushOn && (
+              <button
+                className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+                onClick={testPush}
+              >
+                Probar push
+              </button>
+            )}
+            <button
+              className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+              onClick={togglePush}
+            >
+              {pushOn ? "Desactivar" : "Activar"}
+            </button>
+          </div>
+        </div>
+      )}
       {feedback && <span className="text-gray-400">{feedback}</span>}
     </div>
   );
