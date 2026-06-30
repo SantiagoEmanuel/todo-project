@@ -35,3 +35,27 @@ export async function showPendingReminder(texts: string[]): Promise<void> {
   (options as NotificationOptions & { renotify?: boolean }).renotify = true;
   await reg.showNotification("Tareas pendientes ⏰", options);
 }
+
+export type TestResult = "ok" | "unsupported" | "denied" | "default" | "no-sw";
+
+// Envía una notificación de prueba inmediata para verificar que el permiso,
+// el service worker y la entrega de notificaciones funcionan en este
+// dispositivo/navegador. Devuelve el motivo si no pudo enviarse.
+export async function showTestNotification(): Promise<TestResult> {
+  if (!("Notification" in window)) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
+  if (Notification.permission === "default") return "default";
+  if (!("serviceWorker" in navigator)) return "no-sw";
+  const reg = await navigator.serviceWorker.ready;
+  const icon = `${import.meta.env.BASE_URL}pwa-192.png`;
+  const options: NotificationOptions = {
+    body: "Si ves esto, los recordatorios llegan correctamente ✅",
+    tag: "todo-test",
+    icon,
+    badge: icon,
+    data: { url: import.meta.env.BASE_URL },
+  };
+  (options as NotificationOptions & { renotify?: boolean }).renotify = true;
+  await reg.showNotification("Notificación de prueba 🔔", options);
+  return "ok";
+}
