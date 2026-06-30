@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import type { Todo } from "../types/todo.type";
 import { clearTaskReminder, setTaskReminder } from "../utils/db.functions";
 
@@ -27,11 +28,11 @@ export default function TaskReminder({ todo }: { todo: Todo }) {
         : "programado";
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 px-2 py-1.5 text-[11px] text-gray-500">
+    <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-2 py-2 text-[11px] text-gray-500">
       <span className="whitespace-nowrap">⏰ Recordar el</span>
       <input
         type="datetime-local"
-        className="rounded border border-gray-300 bg-transparent px-1 py-0.5"
+        className="rounded-full border border-gray-200 bg-transparent px-2 py-1 transition-colors hover:bg-white"
         value={remindAt ? toLocalInputValue(remindAt) : ""}
         onChange={(e) => {
           const v = e.target.value;
@@ -43,23 +44,29 @@ export default function TaskReminder({ todo }: { todo: Todo }) {
         }}
       />
       {PRESETS.map((p) => (
-        <button
+        <motion.button
           key={p.minutes}
-          className="cursor-pointer rounded border border-gray-300 px-1.5 py-0.5 hover:bg-gray-100"
+          className="cursor-pointer rounded-full border border-gray-200 px-2 py-1 transition-colors hover:bg-white"
+          whileTap={{ scale: 0.92 }}
           onClick={() =>
             setTaskReminder(todo.id, new Date(Date.now() + p.minutes * 60_000))
           }
         >
           {p.label}
-        </button>
+        </motion.button>
       ))}
       {remindAt && (
         <>
-          <span className={isPast ? "text-gray-400" : "text-[#863bff]"}>
+          <motion.span
+            key={status}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={isPast ? "text-gray-400" : "text-[#863bff]"}
+          >
             {status}
-          </span>
+          </motion.span>
           <button
-            className="cursor-pointer text-gray-400 underline hover:text-gray-600"
+            className="cursor-pointer text-gray-400 underline transition-colors hover:text-gray-600"
             onClick={() => clearTaskReminder(todo.id)}
           >
             quitar
